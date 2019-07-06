@@ -6,10 +6,12 @@
 
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
+#include <ArduinoJson.h>
 #include "secrets.h"
 
 const char* ssid     = STASSID;
 const char* password = STAPSK;
+static String timetoarrive;
 
 //const char* host = "djxmmx.net";
 //const uint16_t port = 17;
@@ -43,31 +45,17 @@ void setup() {
 
 void loop() {
   Serial.print("connecting to ");
-//  Serial.print(host);
-//  Serial.print(':');
-//  Serial.println(port);
-
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
-
-//  if (!client.connect()) {
-//    Serial.println("connection failed");
-//    Serial.println("wait 5 sec...");
-//    delay(5000);
-//    return;
-//  }
   String server = "www.zaragoza.es";
-  
   // This will send the request to the server
-  //client.println("hello from ESP8266");
   if (client.connect(server,80)) {
     Serial.println("Conectado");
     client.print("GET /api/recurso/urbanismo-infraestructuras/transporte-urbano/poste/tuzsa-508?");
     client.println(" HTTP/1.0");
     client.println("Host: www.zaragoza.es");
-      client.println("Content-Type: application/xml");
-      client.println("Accept: application/json");
-//    client.println("accept-encoding: gzip, deflate");
+    client.println("Content-Type: application/json");
+    client.println("Accept: application/json");
     client.println();
   } else {
     Serial.println("Connection Failed!!!");
@@ -86,14 +74,63 @@ void loop() {
         payload += c;
     } 
   }
+  Serial.print("He leido la cadena");
+  Serial.println(payload);
+  Serial.println("@marcos: el primer caracter que busco está en la posición");
+  Serial.println(payload.indexOf("{"));
+  Serial.println("@marcos2:payload real");
+  Serial.println(payload.substring(payload.indexOf("{")));
 
-  Serial.println("He leido la cadena" + payload);
+//  JSON PROCESS
+  if (payload.substring(payload.indexOf("{")).indexOf("error") < 0) { 
+  const size_t capacity = 2*JSON_ARRAY_SIZE(2) + JSON_OBJECT_SIZE(2) + 2*JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(7) + 460;
+  DynamicJsonDocument doc(capacity);
+  String payloadreal = payload.substring(payload.indexOf("{"));
+  char json[2000];
+  payloadreal.toCharArray(json,2000);
+  Serial.println("@marcos3:Json Content");
+  Serial.println(json);  
+  //Serial.println(json);
+
+  deserializeJson(doc, json);
   
-//  //read back one line from server
-//  Serial.println("receiving from remote server");
-//  String line = client.readStringUntil('\r');
-//  Serial.println(line);
+  const char* id = doc["id"]; // "tuzsa-508"
+  const char* title = doc["title"]; // "(508) IGNACIO ZAPATA/RUSTE Líneas: 50, N1, 39"
+  const char* lastUpdated = doc["lastUpdated"]; // "2019-07-06T12:11:41Z"
+  
+  const char* geometry_type = doc["geometry"]["type"]; // "Point"
+  
+  float geometry_coordinates_0 = doc["geometry"]["coordinates"][0]; // 678373.18
+  float geometry_coordinates_1 = doc["geometry"]["coordinates"][1]; // 4614646.32
+  
+  const char* link = doc["link"]; // "http://www.urbanosdezaragoza.es/frm_esquemaparadatime.php?poste=508"
+  const char* icon = doc["icon"]; // "http://www.zaragoza.es/contenidos/iconos/bus.png"
+  
+  JsonObject destinos_0 = doc["destinos"][0];
+  const char* destinos_0_linea = destinos_0["linea"]; // "39"
+  const char* destinos_0_destino = destinos_0["destino"]; // "PINARES DE VENECIA."
+  String destinos_0_primero = destinos_0["primero"]; // "5 minutos."
+  const char* destinos_0_segundo = destinos_0["segundo"]; // "19 minutos."
+  
+  JsonObject destinos_1 = doc["destinos"][1];
+  const char* destinos_1_linea = destinos_1["linea"]; // "50"
+  const char* destinos_1_destino = destinos_1["destino"]; // "SAN GREGORIO."
+  const char* destinos_1_primero = destinos_1["primero"]; // "23 minutos."
+  const char* destinos_1_segundo = destinos_1["segundo"]; // "53 minutos."
 
+  if (destinos_0_primero.equals("\0") or destinos_0_primero.equals("null")) {
+    Serial.print("El próximo 39 llega en ");
+    Serial.println(timetoarrive);
+  } else {
+    Serial.print("El próximo 39 llega en ");
+    Serial.println(destinos_0_primero);
+    timetoarrive = destinos_0_primero;
+  }
+  } else {
+    Serial.println("Error API Request");
+    Serial.print("El próximo 39 llega en ");
+    Serial.println(timetoarrive);
+  }
   Serial.println("closing connection");
   client.stop();
 
