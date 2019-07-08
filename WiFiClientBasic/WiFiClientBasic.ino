@@ -13,6 +13,7 @@ const char* ssid     = STASSID;
 const char* password = STAPSK;
 static String timetoarrive;
 
+
 //const char* host = "djxmmx.net";
 //const uint16_t port = 17;
 
@@ -20,37 +21,36 @@ ESP8266WiFiMulti WiFiMulti;
 
 void setup() {
   Serial.begin(115200);
-
   // We start by connecting to a WiFi network
   WiFi.mode(WIFI_STA);
   WiFiMulti.addAP(ssid, password);
 
-  Serial.println();
-  Serial.println();
-  Serial.print("Wait for WiFi... ");
+  //Serial.println();
+  //Serial.println();
+  //Serial.print("Wait for WiFi... ");
 
   while (WiFiMulti.run() != WL_CONNECTED) {
-    Serial.print(".");
+    //Serial.print(".");
     delay(500);
   }
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  //Serial.println("");
+  //Serial.println("WiFi connected");
+  //Serial.println("IP address: ");
+  //Serial.println(WiFi.localIP());
 
   delay(500);
 }
 
 
 void loop() {
-  Serial.print("connecting to ");
+  //Serial.print("connecting to ");
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
   String server = "www.zaragoza.es";
   // This will send the request to the server
   if (client.connect(server,80)) {
-    Serial.println("Conectado");
+    //Serial.println("Conectado");
     client.print("GET /api/recurso/urbanismo-infraestructuras/transporte-urbano/poste/tuzsa-508?");
     client.println(" HTTP/1.0");
     client.println("Host: www.zaragoza.es");
@@ -58,28 +58,29 @@ void loop() {
     client.println("Accept: application/json");
     client.println();
   } else {
-    Serial.println("Connection Failed!!!");
+    //Serial.println("Connection Failed!!!");
   }
 
   while (client.available() == 0) {
     //Espero respuesta del servidor
+    delay(1000);
   }
   
   String payload ="";
   if (client.available() > 0) {
-    Serial.println("Respuesta del servidor");
+    //Serial.println("Respuesta del servidor");
       char c;
       while (client.available() > 0) {
         c = client.read();
         payload += c;
     } 
   }
-  Serial.print("He leido la cadena");
-  Serial.println(payload);
-  Serial.println("@marcos: el primer caracter que busco está en la posición");
-  Serial.println(payload.indexOf("{"));
-  Serial.println("@marcos2:payload real");
-  Serial.println(payload.substring(payload.indexOf("{")));
+  //Serial.print("He leido la cadena");
+  //Serial.println(payload);
+  //Serial.println("@marcos: el primer caracter que busco está en la posición");
+  //Serial.println(payload.indexOf("{"));
+  //Serial.println("@marcos2:payload real");
+  //Serial.println(payload.substring(payload.indexOf("{")));
 
 //  JSON PROCESS
   if (payload.substring(payload.indexOf("{")).indexOf("error") < 0) { 
@@ -88,8 +89,8 @@ void loop() {
     String payloadreal = payload.substring(payload.indexOf("{"));
     char json[2000];
     payloadreal.toCharArray(json,2000);
-    Serial.println("@marcos3:Json Content");
-    Serial.println(json);  
+    //Serial.println("@marcos3:Json Content");
+    //Serial.println(json);  
     //Serial.println(json);
   
     deserializeJson(doc, json);
@@ -120,31 +121,32 @@ void loop() {
   
     if (destinos_0_linea.equals("39")) {
       if (destinos_0_primero.equals("\0") or destinos_0_primero.equals("null")) {
-        Serial.print("El próximo 39 llega en ");
-        Serial.println(timetoarrive);
+        //Serial.print("El próximo 39 llega en ");
+        //Serial.println(timetoarrive);
       } else {
-        Serial.print("El próximo 39 llega en ");
-        Serial.println(destinos_0_primero);
+        //Serial.print("El próximo 39 llega en ");
+        //Serial.println(destinos_0_primero);
         timetoarrive = destinos_0_primero;
       } 
     } else {
       if (destinos_1_primero.equals("\0") or destinos_1_primero.equals("null")) {
-        Serial.print("El próximo 39 llega en ");
-        Serial.println(timetoarrive);
+        //Serial.print("El próximo 39 llega en ");
+        //Serial.println(timetoarrive);
       } else {
-        Serial.print("El próximo 39 llega en ");
-        Serial.println(destinos_1_primero);
+        //Serial.print("El próximo 39 llega en ");
+        //Serial.println(destinos_1_primero);
         timetoarrive = destinos_1_primero;
       } 
     }
    } else {
-      Serial.println("Error API Request");
-      Serial.print("El próximo 39 llega en ");
-      Serial.println(timetoarrive);
+      //Serial.println("Error API Request");
+      //Serial.print("El próximo 39 llega en ");
+      //Serial.println(timetoarrive);
     }
-  Serial.println("closing connection");
+  //Serial.write("@MARCOS:PRUEBA");
+  Serial.println(timetoarrive);
   client.stop();
 
-  Serial.println("wait 5 sec...");
+  //Serial.println("wait 5 sec...");
   delay(5000);
 }
