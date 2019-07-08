@@ -148,5 +148,12 @@ void loop() {
   client.stop();
 
   //Serial.println("wait 5 sec...");
+  String payloadfromAuno;
+    // listen for communication from the ESP8266 and then write it to the serial monitor
+    while ( Serial.available() > 0 )   { 
+      char c = Serial.read();
+      payloadfromAuno +=c;
+    }
+    Serial.println(payloadfromAuno);
   delay(5000);
 }

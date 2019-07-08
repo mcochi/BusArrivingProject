@@ -1,7 +1,12 @@
 #include <SoftwareSerial.h>
 #include  <LiquidCrystal.h>
-SoftwareSerial ESPserial(2, 3); // RX | TX
+
+#define PIN_LED 13
+#define PIN_PULSADOR 10
+SoftwareSerial ESPserial(2, 11); // RX | TX
 LiquidCrystal lcd(7,6,5,4,3,8);
+int pulsado = 0;
+
 void setup() 
 {
     Serial.begin(115200);     // communication with the host computer
@@ -24,7 +29,9 @@ void setup()
     Serial.println("");
     Serial.println("Remember to to set Both NL & CR in the serial monitor.");
     Serial.println("Ready");
-    Serial.println("");    
+    Serial.println("");   
+    pinMode(PIN_PULSADOR, INPUT_PULLUP);
+    pinMode(PIN_LED, OUTPUT); 
 }
  
 void loop() 
@@ -38,8 +45,23 @@ void loop()
       payload +=c;
     }
     lcd.print(payload);
+    if (payload[0] == '5') {
+     tone(12, 440,100);
+    }
+    
     //delay(3000);
     // listen for user input and send it to the ESP8266
     if ( Serial.available() )       {  ESPserial.write( Serial.read() );  }
+
+    int sensorVal = digitalRead(PIN_PULSADOR);
+//    Serial.println(sensorVal);
+    if (sensorVal == HIGH && pulsado == 0) {
+      digitalWrite(PIN_LED, LOW);
+    }
+    else {
+      digitalWrite(PIN_LED, HIGH);
+      ESPserial.write("CI");
+      //Serial.println("CI");
+    }
     
 }
