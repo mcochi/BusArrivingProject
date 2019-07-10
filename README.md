@@ -8,4 +8,16 @@ In my case, I have 2 bus lines that I'm interested in, 39 and CI2. So, I've prep
 
 ## Fritzing Schema
 Schema is shown below:
-![BusArrivingProject Schema](https://github.com/mcochi/BusArrivingProject/blob/master/BusArrivingProject.fzz)
+![BusArrivingProject Schema](https://github.com/mcochi/BusArrivingProject/blob/master/BusArrivingProject_bb.png)
+
+## BOM
+This is material required:
+
+- Arduino Uno
+- Wemos D1 Mini
+- Protoboard
+- Buzzer
+- Potiontiometer
+- LCD Screen
+- Button
+
