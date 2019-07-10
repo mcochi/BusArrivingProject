@@ -20,4 +20,5 @@ This is material required:
 - Potiontiometer
 - LCD Screen
 - Button
+- Wires
 
